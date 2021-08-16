@@ -13,6 +13,6 @@ data class AutorRequest(
     @field:NotBlank @field:Size(max = 400) val descricao: String
 ) {
     fun toModel(): Autor {
-        return Autor(nome, email, descricao)
+        return Autor(nome = this.nome, email = this.email, descricao = this.descricao)
     }
 }
