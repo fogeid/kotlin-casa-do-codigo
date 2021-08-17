@@ -13,7 +13,6 @@ import javax.validation.Valid
 @Validated
 @Controller("/autores")
 class AutorController(val autorRepository: AutorRepository) {
-
     @Post
     @Transactional
     fun inserir(@Body @Valid request: AutorRequest): HttpResponse<Any> {
@@ -26,28 +25,51 @@ class AutorController(val autorRepository: AutorRepository) {
 
     @Get
     @Transactional
-    fun lista(): HttpResponse<List<AutorResponse>> {
-        val autores = autorRepository.findAll()
-        val response = autores.map {
-            autor -> AutorResponse(autor)
+    fun lista(@QueryValue(defaultValue = "") email: String): HttpResponse<Any> {
+        if (email.isBlank()) {
+            val autores = autorRepository.findAll()
+            val response = autores.map {
+                    autor -> AutorResponse(autor)
+            }
+            return HttpResponse.ok(response)
         }
+        val isAutor = autorRepository.findByEmail(email)
 
-        return HttpResponse.ok(response)
+        if (isAutor.isEmpty) {
+            return HttpResponse.notFound()
+        }
+        return HttpResponse.ok(AutorResponse(isAutor.get()))
     }
 
     @Put("/{id}")
     @Transactional
     fun atualiza(@PathVariable id: String, descricao: String): HttpResponse<Any> {
-        val possivelAutor = autorRepository.findById(id)
+        val isAutor = autorRepository.findById(id)
 
-        if (possivelAutor.isEmpty) {
+        if (isAutor.isEmpty) {
             return HttpResponse.notFound()
         }
 
-        val autor = possivelAutor.get()
+        val autor = isAutor.get()
         autor.descricao = descricao
         autorRepository.update(autor)
         return HttpResponse.ok(AutorResponse(autor))
     }
+
+    @Delete("/{id}")
+    @Transactional
+    fun delete(@PathVariable id: String): HttpResponse<Any> {
+        val isAutor = autorRepository.findById(id)
+
+        if (isAutor.isEmpty) {
+            return HttpResponse.notFound()
+        }
+
+        autorRepository.deleteById(id)
+        return HttpResponse.ok()
+    }
+
+//    @Get
+//    fun liata(@QueryValue(defaultValue = "") email: String):
 
 }
