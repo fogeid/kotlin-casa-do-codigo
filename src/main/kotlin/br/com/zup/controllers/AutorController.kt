@@ -1,7 +1,9 @@
 package br.com.zup.controllers
 
+import br.com.zup.clients.EnderecoClient
 import br.com.zup.dto.request.AutorRequest
 import br.com.zup.dto.response.AutorResponse
+import br.com.zup.dto.response.EnderecoResponse
 import br.com.zup.repositories.AutorRepository
 import io.micronaut.http.HttpResponse
 import io.micronaut.http.annotation.*
@@ -12,11 +14,16 @@ import javax.validation.Valid
 
 @Validated
 @Controller("/autores")
-class AutorController(val autorRepository: AutorRepository) {
+class AutorController(
+    val autorRepository: AutorRepository,
+    val enderecoClient: EnderecoClient
+) {
     @Post
     @Transactional
     fun inserir(@Body @Valid request: AutorRequest): HttpResponse<Any> {
-        val autor = request.toModel()
+        val enderecoResponse: HttpResponse<EnderecoResponse> = enderecoClient.consulta(request.cep)
+        val autor = request.toModel(enderecoResponse.body()!!)
+
         autorRepository.save(autor)
         val uri = UriBuilder.of("/autores/{id}")
             .expand(mutableMapOf(Pair("id", autor.id)))

@@ -7,10 +7,11 @@ import javax.persistence.GeneratedValue
 import javax.persistence.Id
 
 @Entity
-class Autor(
+data class Autor(
     val nome: String,
     val email: String,
-    var descricao: String
+    var descricao: String,
+    val endereco: Endereco
 ) {
     @Id @GeneratedValue(generator = "UUID")
     @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
